@@ -1,0 +1,43 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * This file is a standalone command runs the "update-dependencies" command.
+ */
+
+// Thanks to g1a/starter for providing a standard autoloader.
+// If we're running from phar load the phar autoload file.
+$pharPath = \Phar::running(true);
+if ($pharPath) {
+  $autoloaderPath = "$pharPath/vendor/autoload.php";
+} else {
+  if (file_exists(__DIR__.'/vendor/autoload.php')) {
+    $autoloaderPath = __DIR__.'/vendor/autoload.php';
+  } elseif (file_exists(__DIR__.'/../../autoload.php')) {
+    $autoloaderPath = __DIR__ . '/../../autoload.php';
+  } else {
+    die("Could not find autoloader. Run 'composer install'.");
+  }
+}
+$classLoader = require $autoloaderPath;
+
+use ProvisionOps\UpdateDependencies\Command as UpdateDependenciesCommand;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Output\ConsoleOutput;
+
+$version = 'dev';
+$application = new Application('update-dependencies', $version);
+
+$command = new UpdateDependenciesCommand();
+$composer = new \Composer\Composer();
+
+$package = new \Composer\Package\RootPackage("provision-ops/update-dependencies", $version, "Development");
+$composer->setPackage($package);
+
+$command->setComposer($composer);
+
+$application->add($command);
+$application->setDefaultCommand($command->getName(), true);
+
+$application->run();
