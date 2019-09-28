@@ -11,9 +11,7 @@ of updates for any composer package.
 
     composer require provision-ops/update-dependencies
     
-## WIP
-
-More information coming soon. This project is brand new.
+More information coming soon.
 
 ## Workflow
 
@@ -24,3 +22,9 @@ More information coming soon. This project is brand new.
 5. New Pull Request is created, if GITHUB_TOKEN is available.
 6. If tests pass and commit status is good, automatically merge the PR
    (Stretch Goal. Not sure if this tool can handle this)
+   
+## Contributing
+
+See https://getcomposer.org/doc/articles/plugins.md#creating-a-plugin
+
+More to come.
