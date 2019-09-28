@@ -80,13 +80,18 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface
      */
     public function preUpdateCommand(\Composer\Script\Event $event)
     {
-        $this->io->write("ProvisionOps::preUpdateCommand");
+        // Don't proceed if composer.lock file is not in git.
+        $info = $this->gitRepo->getObjectInfo('composer.lock');
+        if (empty($info['type'])) {
+            throw new \Exception('Composer Update: composer.lock file is not committed to the git repository. Please commit the file and try again.');
+        }
 
         // Don't proceed if composer lock or json is modified.
         if (!empty($this->gitRepo->getDiff(['composer.lock']))) {
             throw new \Exception('Composer Update: composer.lock file is modified. Commit or revert the changes before running composer update command.');
         }
-        elseif (!empty($this->gitRepo->getDiff(['composer.json']))) {
+
+        if (!empty($this->gitRepo->getDiff(['composer.json']))) {
             throw new \Exception('Composer Update: composer.json file is modified. Commit or revert the changes before running composer update command.');
         }
     }
@@ -96,7 +101,10 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface
      */
     public function postUpdateCommand(\Composer\Script\Event $event)
     {
-        $this->io->write("ProvisionOps: postUpdateCommand");
-
+        if (!empty($this->gitRepo->getDiff(['composer.lock']))) {
+            $this->io->write(
+              '<comment>Updates to composer.lock detected.</comment>'
+            );
+        }
     }
 }
