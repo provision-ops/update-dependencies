@@ -26,6 +26,10 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface
     {
         $this->composer = $composer;
         $this->io = $io;
+
+        // @TODO: Load .env from composer working dir.
+        //        if (file_exists(dirname(__DIR__))) . '.env';
+        print $composer->getConfig()->get('working-dir');
     }
 
     /**
@@ -51,10 +55,22 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface
     /**
      * @param Event $event
      */
+    public function postUpdateCommand(Event $event)
+    {
+
+        $this->io->write("ProvisionOps: postUpdateCommand");
+
+        print $event->getName();
+
+    }
+
+    /**
+     * @param Event $event
+     */
     public function postPackageUpdate(PackageEvent $event)
     {
 
-        $this->io->write("ProvisionOps: Update Dependencies!");
+        $this->io->write("ProvisionOps: postPackageUpdate");
 
         print $event->getName();
 
