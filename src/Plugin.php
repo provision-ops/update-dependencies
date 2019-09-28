@@ -87,11 +87,12 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface
         }
 
         // Don't proceed if composer lock or json is modified.
-        if (!empty($this->gitRepo->getDiff(['composer.lock']))) {
+        $diff = $this->gitRepo->getDiff();
+        if (!empty($diff['composer.lock'])) {
             throw new \Exception('Composer Update: composer.lock file is modified. Commit or revert the changes before running composer update command.');
         }
 
-        if (!empty($this->gitRepo->getDiff(['composer.json']))) {
+        if (!empty($diff['composer.json'])) {
             throw new \Exception('Composer Update: composer.json file is modified. Commit or revert the changes before running composer update command.');
         }
     }
@@ -105,6 +106,14 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface
             $this->io->write(
               '<comment>Updates to composer.lock detected.</comment>'
             );
+
+            // @TODO:
+            // Git checkout new branch
+            // Git commit.
+            // git push new branch
+            // GitHub API Submit PR.
+            // Git checkout original branch.
+
         }
     }
 }
