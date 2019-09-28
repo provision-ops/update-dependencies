@@ -12,6 +12,7 @@ use Composer\Plugin\PluginInterface;
 use Composer\Plugin\PluginEvents;
 use Composer\Plugin\PreFileDownloadEvent;
 use Composer\Script\ScriptEvents;
+use Symfony\Component\Process\Process;
 use TQ\Git\Repository\Repository;
 
 class Plugin implements PluginInterface, Capable, EventSubscriberInterface
@@ -38,6 +39,11 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface
     protected $gitRepo;
 
     /**
+     * @var Process
+     */
+    protected $process;
+
+    /**
      * @param \Composer\Composer $composer
      * @param \Composer\IO\IOInterface $io
      */
@@ -45,6 +51,7 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface
     {
         $this->composer = $composer;
         $this->io = $io;
+        $this->process = new Process('');
 
         $this->workingDir = getcwd();
         $this->gitRepo = Repository::open($this->workingDir);
@@ -107,13 +114,39 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface
               '<comment>Updates to composer.lock detected.</comment>'
             );
 
-            // @TODO:
+            $hash = md5(file_get_contents('composer.lock'));
+            $branch_name = 'composer-updates-' . $hash;
+
             // Git checkout new branch
-            // Git commit.
+            $this->io->write("Creating new branch...  <comment>$branch_name</comment>");
+            $this->run("git checkout -b $branch_name");
+
+            // Git commit changes to lockfile.
+            $this->io->write("Committing changes to  <comment>$branch_name</comment>");
+            $this->run("git commit composer.lock -m 'Automatic composer update by provision-ops/update-dependencies'");
+
             // git push new branch
+            $this->io->write("Pushing branch...  <comment>$branch_name</comment>");
+            $this->run("git push -u origin $branch_name");
+
+            $this->io->write("<comment>Branch Pushed.</comment>");
+
+            // @TODO:
             // GitHub API Submit PR.
             // Git checkout original branch.
 
         }
+    }
+
+    /**
+     * Run a command.
+     * @param $cmd
+     *
+     * @return int
+     */
+    protected function run($cmd) {
+        $this->process->setCommandLine($cmd)->mustRun(function($type, $out) {
+            echo $out;
+        });
     }
 }
