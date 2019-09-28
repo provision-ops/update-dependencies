@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "392c4c78f4b2e2c967092cbad2b986c3",
+    "content-hash": "87c3aec7aa81e7ada56deda3fc2f84d7",
     "packages": [
         {
             "name": "clue/stream-filter",
@@ -3220,7 +3220,6 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "provision-ops/power-process": 20,
-        "vlucas/phpdotenv": 20,
         "composer/composer": 20
     },
     "prefer-stable": false,
