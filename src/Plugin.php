@@ -12,22 +12,44 @@ use Composer\Plugin\PluginInterface;
 use Composer\Plugin\PluginEvents;
 use Composer\Plugin\PreFileDownloadEvent;
 use Composer\Script\ScriptEvents;
+use TQ\Git\Repository\Repository;
 
 class Plugin implements PluginInterface, Capable, EventSubscriberInterface
 {
+
+    /**
+     * @var Composer
+     */
     protected $composer;
 
     /**
      * @var IOInterface
      */
     protected $io;
-    
+
+    /**
+     * @var String Composer working directory. Same as composer.json
+     */
+    protected $workingDir;
+
+    /**
+     * @var \TQ\Git\Repository\Repository
+     */
+    protected $gitRepo;
+
+    /**
+     * @param \Composer\Composer $composer
+     * @param \Composer\IO\IOInterface $io
+     */
     public function activate(Composer $composer, IOInterface $io)
     {
         $this->composer = $composer;
         $this->io = $io;
 
-        // @TODO: Load .env from composer working dir.
+        $this->workingDir = getcwd();
+        $this->gitRepo = Repository::open($this->workingDir);
+
+        // @TODO: Load .env from composer w  Subscriber ProvisionOps\UpdateDependencies\Plugin::pluginDemoMethod for event init is not
         //        if (file_exists(dirname(__DIR__))) . '.env';
         print $composer->getConfig()->get('working-dir');
     }
@@ -38,10 +60,8 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return array(
-            PluginEvents::INIT => 'pluginDemoMethod',
-            PluginEvents::COMMAND => '',
+            'pre-update-cmd' => 'preUpdateCommand',
             'post-update-cmd' => 'postUpdateCommand',
-            'post-package-update' => 'postPackageUpdate',
         );
     }
 
@@ -53,26 +73,30 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface
     }
 
     /**
+     * Before running the update command, ensure composer.lock file is not
+     * modified.
+     *
      * @param Event $event
      */
-    public function postUpdateCommand(Event $event)
+    public function preUpdateCommand(\Composer\Script\Event $event)
     {
+        $this->io->write("ProvisionOps::preUpdateCommand");
 
-        $this->io->write("ProvisionOps: postUpdateCommand");
-
-        print $event->getName();
-
+        // Don't proceed if composer lock or json is modified.
+        if (!empty($this->gitRepo->getDiff(['composer.lock']))) {
+            throw new \Exception('Composer Update: composer.lock file is modified. Commit or revert the changes before running composer update command.');
+        }
+        elseif (!empty($this->gitRepo->getDiff(['composer.json']))) {
+            throw new \Exception('Composer Update: composer.json file is modified. Commit or revert the changes before running composer update command.');
+        }
     }
 
     /**
      * @param Event $event
      */
-    public function postPackageUpdate(PackageEvent $event)
+    public function postUpdateCommand(\Composer\Script\Event $event)
     {
-
-        $this->io->write("ProvisionOps: postPackageUpdate");
-
-        print $event->getName();
+        $this->io->write("ProvisionOps: postUpdateCommand");
 
     }
 }
