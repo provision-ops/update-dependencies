@@ -12,6 +12,7 @@ use Composer\Plugin\PluginInterface;
 use Composer\Plugin\PluginEvents;
 use Composer\Plugin\PreFileDownloadEvent;
 use Composer\Script\ScriptEvents;
+use Github\Client;
 use Symfony\Component\Process\Process;
 use TQ\Git\Repository\Repository;
 
@@ -39,6 +40,21 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface
     protected $gitRepo;
 
     /**
+     * @var \Github\Client
+     */
+    protected $gitHubClient;
+
+    /**
+     * @var String GitHub Repo Owner
+     */
+    protected $repoOwner;
+
+    /**
+     * @var String GitHub Repo name
+     */
+    protected $repoName;
+
+    /**
      * @var Process
      */
     protected $process;
@@ -55,6 +71,25 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface
 
         $this->workingDir = getcwd();
         $this->gitRepo = Repository::open($this->workingDir);
+
+        $remote_url = strtr(
+          $this->gitRepo->getCurrentRemote()['origin']['fetch'],
+          array(
+            'git@' => 'https://',
+            'git://' => 'https://',
+            '.git' => '',
+            'github.com:' => 'github.com/',
+          )
+        );
+
+        $parts = explode('/', parse_url($remote_url, PHP_URL_PATH));
+        if (isset($parts[1]) && isset($parts[2])) {
+            $this->repoOwner = isset($parts[1])? $parts[1]: '';
+            $this->repoName =isset($parts[2])? $parts[2]: '';
+        } else {
+            $this->repoOwner = '';
+            $this->repoName = '';
+        }
 
         // @TODO: Load .env from composer w  Subscriber ProvisionOps\UpdateDependencies\Plugin::pluginDemoMethod for event init is not
         //        if (file_exists(dirname(__DIR__))) . '.env';
@@ -133,6 +168,27 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface
 
             // @TODO:
             // GitHub API Submit PR.
+            $this->gitHubClient = new Client();
+
+            /** @var $result CallResult */
+            $result = $this->getGit()->{'show'}($this->getRepositoryPath(), array(
+              $this->gitRepo->getCurrentCommit()
+            ));
+            $result->assertSuccess(sprintf('Cannot show latest commit.'));
+            $body = $result->getStdOut();
+
+            /** @var \Github\Api\PullRequest $pullRequest */
+            $pullRequest = $this->gitHubClient->api('pull_request')->create($this->gitOwner, $this->gitRepo, array(
+              'base'  => $this->baseBranch,
+              'head'  => $branch_name,
+              'title' => 'Automatic Composer Update: ' . date('Z'),
+              'body'  => $body,
+            ));
+
+            $page = $pullRequest->getPage();
+
+            $this->io->write($page);
+
             // Git checkout original branch.
 
         }
