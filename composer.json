@@ -9,7 +9,8 @@
         "ext-json": "*",
         "knplabs/github-api": "~2.11",
         "php-http/guzzle6-adapter": "^1.1",
-        "vlucas/phpdotenv": "^2.0 || ^3.0"
+        "vlucas/phpdotenv": "^2.0 || ^3.0",
+        "php-http/httplug": "^1.1"
     },
     "autoload": {
         "psr-4": {

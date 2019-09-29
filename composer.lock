@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9af1273e395b6479a276bd4ed1be2813",
+    "content-hash": "23f0180254bce2d3e731faa9e1aae012",
     "packages": [
         {
             "name": "clue/stream-filter",
@@ -252,12 +252,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/KnpLabs/php-github-api.git",
-                "reference": "3b0f0c9b2ad382e1017fdb250b29e25a16e9143f"
+                "reference": "4a2a77b1f68f85520fcc948d7a59b5aa55d7b7f2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/KnpLabs/php-github-api/zipball/3b0f0c9b2ad382e1017fdb250b29e25a16e9143f",
-                "reference": "3b0f0c9b2ad382e1017fdb250b29e25a16e9143f",
+                "url": "https://api.github.com/repos/KnpLabs/php-github-api/zipball/4a2a77b1f68f85520fcc948d7a59b5aa55d7b7f2",
+                "reference": "4a2a77b1f68f85520fcc948d7a59b5aa55d7b7f2",
                 "shasum": ""
             },
             "require": {
@@ -311,7 +311,7 @@
                 "gist",
                 "github"
             ],
-            "time": "2019-09-09T17:51:50+00:00"
+            "time": "2019-09-29T18:58:39+00:00"
         },
         {
             "name": "php-http/cache-plugin",
