@@ -167,8 +167,6 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface
             $this->io->write("<comment>Branch Pushed.</comment>");
 
             // @TODO:
-            // GitHub API Submit PR.
-            $this->gitHubClient = new Client();
 
             /** @var $result CallResult */
             $result = $this->getGit()->{'show'}($this->getRepositoryPath(), array(
@@ -178,7 +176,16 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface
             $body = $result->getStdOut();
 
             /** @var \Github\Api\PullRequest $pullRequest */
-            $pullRequest = $this->gitHubClient->api('pull_request')->create($this->gitOwner, $this->gitRepo, array(
+
+            // GitHub API Submit PR.
+            // @TODO: Client cannot be created here.
+            $this->gitHubClient = new Client();
+
+            $this->baseBranch = $this->gitHubClient->repo()->show($this->repoOwner, $this->repoName)->default_branch;
+
+            print $this->baseBranch;
+
+            $pullRequest = $this->gitHubClient->api('pull_request')->create($this->repoOwner, $this->repoName, array(
               'base'  => $this->baseBranch,
               'head'  => $branch_name,
               'title' => 'Automatic Composer Update: ' . date('Z'),
