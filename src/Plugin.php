@@ -149,7 +149,7 @@ class Plugin implements PluginInterface, Capable, EventSubscriberInterface
               '<comment>Updates to composer.lock detected.</comment>'
             );
 
-            $hash = md5(file_get_contents('composer.lock'));
+            $hash = md5(file_get_contents('composer.lock') .  time());
             $branch_name = 'composer-updates-' . $hash;
 
             // Git checkout new branch
